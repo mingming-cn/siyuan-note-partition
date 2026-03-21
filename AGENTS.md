@@ -1,4 +1,4 @@
-# siyuan-partition Codex Reference
+# siyuan-note-partition Codex Reference
 
 ## 1. Project Goal
 

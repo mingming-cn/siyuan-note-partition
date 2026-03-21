@@ -121,7 +121,7 @@ export default class SiyuanPartitionPlugin extends Plugin {
         }
 
         const rect = this.resolveMenuRect();
-        const menu = new Menu("siyuan-partition-topbar");
+        const menu = new Menu("siyuan-note-partition-topbar");
         menu.addItem({
             icon: "iconSettings",
             label: this.i18n.openPartitionManager,

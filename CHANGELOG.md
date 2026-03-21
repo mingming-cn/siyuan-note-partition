@@ -6,7 +6,7 @@ The format is loosely based on Keep a Changelog.
 
 ## [0.0.1] - 2026-03-21
 
-Initial MVP release of SiYuan Partition.
+Initial MVP release of SiYuan Note Partition.
 
 ### Added
 

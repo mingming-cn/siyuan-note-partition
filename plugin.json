@@ -1,48 +1,37 @@
 {
-  "name": "siyuan-partition",
-  "author": "ming",
-  "url": "",
+  "name": "siyuan-note-partition",
+  "author": "mingming.wang",
+  "url": "https://github.com/mingming-cn/siyuan-note-partition",
   "version": "0.0.1",
   "minAppVersion": "3.2.1",
-  "disabledInPublish": true,
+  "disabledInPublish": false,
   "backends": [
-    "windows",
-    "linux",
-    "darwin",
-    "ios",
-    "android",
-    "harmony",
-    "docker"
+    "all"
   ],
   "frontends": [
-    "desktop",
-    "mobile",
-    "browser-desktop",
-    "browser-mobile",
-    "desktop-window"
+    "all"
   ],
   "displayName": {
-    "default": "SiYuan Partition",
-    "zh_CN": "思源分区"
+    "default": "Note Partition",
+    "zh_CN": "笔记分区"
   },
   "description": {
-    "default": "Simulate workspace-like note partitions inside a single notebook",
-    "zh_CN": "在同一笔记本内模拟工作空间式的笔记分区视图"
+    "default": "Simulate workspace-like note partitions inside a single workspace",
+    "zh_CN": "在同一工作空间中内模拟工作空间式的笔记分区视图"
   },
   "readme": {
     "default": "README.md",
     "zh_CN": "README_zh_CN.md"
   },
   "funding": {
-    "openCollective": "",
-    "patreon": "",
-    "github": "https://github.com/mingming-cn/siyuan-partition",
-    "custom": []
+    "custom": [
+      "https://github.com/mingming-cn/siyuan-note-partition"
+    ]
   },
   "keywords": [
     "partition",
     "workspace",
-    "思源",
+    "笔记",
     "分区"
   ]
 }
