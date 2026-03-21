@@ -2,32 +2,31 @@
 
 [中文版](https://github.com/mingming-cn/siyuan-note-partition/blob/main/README_zh_CN.md)
 
-SiYuan Note Partition is a SiYuan plugin that provides workspace-like partitions without switching real SiYuan workspaces. The current product model uses top-level notebook association only.
+SiYuan Note Partition is a SiYuan plugin that provides workspace-like partitions without switching real SiYuan workspaces.
 
 ## Project Positioning
 
 - Simulate workspace switching with partitions
-- Let each partition maintain its own associated top-level notebooks
+- Let each partition maintain its own associated notebooks
 - Control visibility by opening notebooks in the active partition and closing unrelated notebooks
 - Do not provide security isolation, encryption, or true workspace separation
 
 ## Current Features
 
-- Create a default partition on first use and associate it with all current top-level notebooks
+- Create a default partition on first use and associate it with all current notebooks
 - Add, delete, and rename partitions
 - Manage partition-to-notebook associations
 - Always keep at least one partition; the last partition cannot be deleted
 - Provide a left top-bar entry showing `icon + current partition name`
 - Support quick switching and opening the management dialog from the top-bar menu
 - Apply notebook visibility on partition switch
-- Automatically associate newly created top-level notebooks with the active partition
+- Automatically associate newly created notebooks with the active partition
 
 ## Current Boundaries
 
-- Only top-level notebook filtering is supported
-- No path-level filtering
+- Only notebook filtering is supported, No path-level filtering
 - No note-level association
-- The left top-bar button is the only main entry; there is no left Dock entry
+- The left top-bar button is the only main entry
 
 ## Tech Stack
 
