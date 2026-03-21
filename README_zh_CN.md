@@ -1,10 +1,8 @@
 # 思源分区
 
-[English](./README.md)
+[English](https://github.com/mingming-cn/siyuan-note-partition/blob/main/README.md)
 
 笔记分区是一个思源笔记插件，用于在不切换真实思源工作空间的前提下，提供“工作分区”能力。当前产品模型只按顶级笔记本做分区关联与显示控制。
-
-![思源分区预览](./preview.png)
 
 ## 项目定位
 

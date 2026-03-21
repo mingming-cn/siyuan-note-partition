@@ -1,10 +1,8 @@
 # SiYuan Note Partition
 
-[中文版](./README_zh_CN.md)
+[中文版](https://github.com/mingming-cn/siyuan-note-partition/blob/main/README_zh_CN.md)
 
 SiYuan Note Partition is a SiYuan plugin that provides workspace-like partitions without switching real SiYuan workspaces. The current product model uses top-level notebook association only.
-
-![SiYuan Note Partition Preview](./preview.png)
 
 ## Project Positioning
 

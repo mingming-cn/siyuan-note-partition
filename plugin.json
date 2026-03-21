@@ -4,7 +4,7 @@
   "url": "https://github.com/mingming-cn/siyuan-note-partition",
   "version": "0.0.1",
   "minAppVersion": "3.2.1",
-  "disabledInPublish": false,
+  "disabledInPublish": true,
   "backends": [
     "all"
   ],
@@ -22,11 +22,6 @@
   "readme": {
     "default": "README.md",
     "zh_CN": "README_zh_CN.md"
-  },
-  "funding": {
-    "custom": [
-      "https://github.com/mingming-cn/siyuan-note-partition"
-    ]
   },
   "keywords": [
     "partition",
