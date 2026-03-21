@@ -1,8 +1,8 @@
 {
-  "name": "plugin-sample-vite-svelte",
-  "author": "frostime",
-  "url": "https://github.com/siyuan-note/plugin-sample-vite-svelte",
-  "version": "0.4.1",
+  "name": "siyuan-partition",
+  "author": "ming",
+  "url": "",
+  "version": "0.0.1",
   "minAppVersion": "3.2.1",
   "disabledInPublish": true,
   "backends": [
@@ -22,12 +22,12 @@
     "desktop-window"
   ],
   "displayName": {
-    "default": "Plugin sample with vite and svelte",
-    "zh_CN": "插件样例 vite + svelte 版"
+    "default": "SiYuan Partition",
+    "zh_CN": "思源分区"
   },
   "description": {
-    "default": "SiYuan plugin sample with vite and svelte",
-    "zh_CN": "使用 vite 和 svelte 开发的思源插件样例"
+    "default": "Simulate workspace-like note partitions inside a single notebook",
+    "zh_CN": "在同一笔记本内模拟工作空间式的笔记分区视图"
   },
   "readme": {
     "default": "README.md",
@@ -36,13 +36,13 @@
   "funding": {
     "openCollective": "",
     "patreon": "",
-    "github": "",
-    "custom": [
-      "https://ld246.com/sponsor"
-    ]
+    "github": "https://github.com/mingming-cn/siyuan-partition",
+    "custom": []
   },
   "keywords": [
-    "sample",
-    "示例"
+    "partition",
+    "workspace",
+    "思源",
+    "分区"
   ]
 }

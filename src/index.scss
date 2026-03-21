@@ -1,0 +1,222 @@
+.partition-topbar {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    width: auto;
+    max-width: 180px;
+    padding: 0 10px;
+    border: 1px solid var(--b3-border-color);
+    border-radius: 999px;
+    background: var(--b3-theme-background);
+}
+
+.partition-topbar__value {
+    max-width: 120px;
+    padding: 0 8px;
+    border-radius: 999px;
+    background: var(--b3-theme-primary-lightest);
+    color: var(--b3-theme-primary);
+    font-size: 12px;
+    line-height: 20px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.partition-panel-host {
+    height: 100%;
+}
+
+.partition-panel {
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+    height: 100%;
+    gap: 16px;
+    padding: 16px;
+    box-sizing: border-box;
+}
+
+.partition-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 8px 12px 8px 4px;
+    border-right: 1px solid var(--b3-border-color);
+    box-sizing: border-box;
+}
+
+.partition-list__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.partition-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--b3-border-color);
+    border-radius: 8px;
+    background: var(--b3-theme-background);
+    color: var(--b3-theme-on-background);
+    cursor: pointer;
+    text-align: left;
+}
+
+.partition-item.selected {
+    border-color: var(--b3-theme-primary);
+    background: var(--b3-theme-primary-lightest);
+}
+
+.partition-item__remove {
+    color: var(--b3-theme-on-surface-light);
+    font-size: 12px;
+}
+
+.partition-item__remove.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.partition-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 0;
+    padding: 8px 8px 8px 0;
+    box-sizing: border-box;
+}
+
+.partition-form__top {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.partition-form__name {
+    margin: 0;
+}
+
+.partition-form__save {
+    flex: 0 0 auto;
+    align-self: stretch;
+    white-space: nowrap;
+}
+
+.partition-form__name-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.partition-form__name-row .b3-text-field {
+    flex: 1;
+    min-width: 0;
+}
+
+.partition-form__name-row .partition-form__save {
+    flex: 0 0 auto;
+}
+
+.partition-notebook-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+    align-content: start;
+    max-height: 420px;
+    overflow: auto;
+    padding-right: 4px;
+}
+
+.partition-notebook-item {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 8px;
+    align-items: start;
+    min-height: 74px;
+    padding: 10px 12px;
+    border: 1px solid var(--b3-border-color);
+    border-radius: 8px;
+    background: var(--b3-theme-background);
+    box-sizing: border-box;
+}
+
+.partition-notebook-item__meta {
+    grid-column: 2;
+    color: var(--b3-theme-on-surface-light);
+    font-size: 12px;
+    word-break: break-all;
+}
+
+.partition-empty,
+.partition-inline-hint {
+    color: var(--b3-theme-on-surface-light);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.partition-dock {
+    height: 100%;
+}
+
+.partition-dock__body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px;
+}
+
+.partition-dock__row {
+    word-break: break-word;
+}
+
+.partition-dock__hint {
+    margin-top: 8px;
+    color: var(--b3-theme-on-surface-light);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+@media (max-width: 720px) {
+    .partition-topbar {
+        max-width: 160px;
+        padding: 0 8px;
+    }
+
+    .partition-panel {
+        grid-template-columns: 1fr;
+        padding: 12px;
+    }
+
+    .partition-list {
+        padding: 0 0 8px;
+        padding-bottom: 8px;
+        border-right: 0;
+        border-bottom: 1px solid var(--b3-border-color);
+    }
+
+    .partition-form {
+        padding: 0;
+    }
+
+    .partition-form__top {
+        align-items: stretch;
+    }
+
+    .partition-form__name-row {
+        align-items: stretch;
+    }
+
+    .partition-form__name-row .partition-form__save {
+        align-self: auto;
+    }
+
+    .partition-notebook-list {
+        grid-template-columns: 1fr;
+        max-height: none;
+    }
+}
