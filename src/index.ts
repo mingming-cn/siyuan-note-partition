@@ -1,4 +1,4 @@
-import { Dialog, Menu, Plugin, getFrontend, showMessage } from "siyuan";
+import { Dialog, Menu, Plugin, getFrontend, showMessage, type IWebSocketData } from "siyuan";
 import "./index.scss";
 
 import { lsNotebooks } from "@/api";
@@ -59,7 +59,7 @@ export default class SiyuanPartitionPlugin extends Plugin {
   }
 
   uninstall() {
-    // 卸载插件时删除插件数据
+    console.log(`[${this.name}] uninstall`);
     // Delete plugin data when uninstalling the plugin
     this.removeData(STORAGE_NAME).catch(e => {
       showMessage(`uninstall [${this.name}] remove data [${STORAGE_NAME}] fail: ${e.msg}`);
@@ -235,9 +235,24 @@ export default class SiyuanPartitionPlugin extends Plugin {
 <span class="partition-topbar__value">${this.escapeHtml(activePartition.name)}</span>`;
   }
 
-  private handleWsMain = async () => {
+  private handleWsMain = async (event: CustomEvent<IWebSocketData>) => {
+    if (!this.isCreateNotebookWsEvent(event.detail)) {
+      return;
+    }
+
     await this.syncNewNotebooksToActivePartition();
   };
+
+  private isCreateNotebookWsEvent(event: IWebSocketData) {
+    const payload = JSON.stringify({
+      cmd: event?.cmd,
+      callback: event?.callback,
+      msg: event?.msg,
+      data: event?.data,
+    }).toLowerCase();
+
+    return payload.includes("createnotebook");
+  }
 
   private async syncNewNotebooksToActivePartition() {
     if (this.syncingNotebookCreation) {
@@ -255,9 +270,9 @@ export default class SiyuanPartitionPlugin extends Plugin {
         )
         : current;
 
-      this.data[STORAGE_NAME] = nextState;
-      await this.saveData(STORAGE_NAME, nextState);
       if (addedNotebookIds.length > 0) {
+        this.data[STORAGE_NAME] = nextState;
+        await this.saveData(STORAGE_NAME, nextState);
         await this.applyActivePartition();
       }
       this.refreshTopBar();
