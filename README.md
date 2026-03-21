@@ -4,6 +4,8 @@
 
 SiYuan Partition is a SiYuan plugin that provides workspace-like partitions without switching real SiYuan workspaces. The current product model uses top-level notebook association only.
 
+![SiYuan Partition Preview](./preview.png)
+
 ## Project Positioning
 
 - Simulate workspace switching with partitions
