@@ -171,9 +171,8 @@ export default class SiyuanPartitionPlugin extends Plugin {
     }
 
     menu.open({
-      x: rect.left,
-      y: rect.bottom,
-      isLeft: true,
+      x: Math.round(rect.left),
+      y: Math.round(rect.bottom + 6),
     });
   }
 
