@@ -46,8 +46,8 @@ pnpm run dev
 
 ## Docs
 
-- Detailed design: [docs/feature-design.md](./docs/feature-design.md)
-- Codex reference: [AGENTS.md](./AGENTS.md)
+- Detailed design: [docs/feature-design.md](https://github.com/mingming-cn/siyuan-note-partition/blob/main/docs/feature-design.md)
+- Codex reference: [AGENTS.md](https://github.com/mingming-cn/siyuan-note-partition/blob/main/AGENTS.md)
 
 ## References
 

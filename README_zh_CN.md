@@ -46,8 +46,8 @@ pnpm run dev
 
 ## 文档
 
-- 详细设计见 [docs/feature-design.md](./docs/feature-design.md)
-- Codex 参考见 [AGENTS.md](./AGENTS.md)
+- 详细设计见 [docs/feature-design.md](https://github.com/mingming-cn/siyuan-note-partition/blob/main/docs/feature-design.md)
+- Codex 参考见 [AGENTS.md](https://github.com/mingming-cn/siyuan-note-partition/blob/main/AGENTS.md)
 
 ## 参考资料
 
