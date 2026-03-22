@@ -66,13 +66,11 @@ body.partition-switching::after {
     align-items: center;
     justify-content: space-between;
     gap: 8px;
-    width: 100%;
     padding: 10px 12px;
     border: 1px solid var(--b3-border-color);
     border-radius: 8px;
     background: var(--b3-theme-background);
     color: var(--b3-theme-on-background);
-    cursor: pointer;
     text-align: left;
 }
 
@@ -81,14 +79,29 @@ body.partition-switching::after {
     background: var(--b3-theme-primary-lightest);
 }
 
-.partition-item__remove {
-    color: var(--b3-theme-on-surface-light);
-    font-size: 12px;
+.partition-item__main {
+    flex: 1;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    text-align: left;
 }
 
-.partition-item__remove.disabled {
+.partition-item__remove {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--b3-theme-on-surface-light);
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.partition-item__remove:disabled {
     opacity: 0.5;
-    pointer-events: none;
+    cursor: default;
 }
 
 .partition-form {
@@ -128,12 +141,6 @@ body.partition-switching::after {
     margin: 0;
 }
 
-.partition-form__save {
-    flex: 0 0 auto;
-    align-self: stretch;
-    white-space: nowrap;
-}
-
 .partition-form__actions {
     display: flex;
     justify-content: flex-end;
@@ -155,10 +162,6 @@ body.partition-switching::after {
 .partition-form__name-row .b3-text-field {
     flex: 1;
     min-width: 0;
-}
-
-.partition-form__name-row .partition-form__save {
-    flex: 0 0 auto;
 }
 
 .partition-notebook-list {
@@ -252,10 +255,6 @@ body.partition-switching::after {
 
     .partition-form__name-row {
         align-items: stretch;
-    }
-
-    .partition-form__name-row .partition-form__save {
-        align-self: auto;
     }
 
     .partition-form__actions {

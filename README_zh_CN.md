@@ -51,6 +51,7 @@ pnpm run dev
 ## 参考资料
 
 - 思源社区文档: https://docs.siyuan-note.club/zh-Hans/reference/
+- 思源笔记源代码: https://github.com/siyuan-note/siyuan
 - 插件开发 Quick Start: https://ld246.com/article/1723732790981
 - SiYuan Plugin API: https://github.com/siyuan-note/petal
 - 官方插件示例: https://github.com/siyuan-note/plugin-sample

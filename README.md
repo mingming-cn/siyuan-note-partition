@@ -51,6 +51,7 @@ pnpm run dev
 ## References
 
 - SiYuan community docs: https://docs.siyuan-note.club/zh-Hans/reference/
+- SiYuan source code: https://github.com/siyuan-note/siyuan
 - Plugin Quick Start: https://ld246.com/article/1723732790981
 - SiYuan Plugin API: https://github.com/siyuan-note/petal
 - Official plugin sample: https://github.com/siyuan-note/plugin-sample

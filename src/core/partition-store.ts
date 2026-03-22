@@ -44,6 +44,36 @@ export function normalizeState(
     };
 }
 
+export function isPluginStateEqual(a: PluginState | undefined, b: PluginState | undefined): boolean {
+    if (!a || !b) {
+        return a === b;
+    }
+
+    if (a.version !== b.version || a.activePartitionId !== b.activePartitionId || a.partitions.length !== b.partitions.length) {
+        return false;
+    }
+
+    return a.partitions.every((partition, index) => {
+        const target = b.partitions[index];
+        if (!target) {
+            return false;
+        }
+
+        if (
+            partition.id !== target.id ||
+            partition.name !== target.name ||
+            partition.sort !== target.sort ||
+            partition.createdAt !== target.createdAt ||
+            partition.updatedAt !== target.updatedAt ||
+            partition.notebookIds.length !== target.notebookIds.length
+        ) {
+            return false;
+        }
+
+        return partition.notebookIds.every((id, notebookIndex) => id === target.notebookIds[notebookIndex]);
+    });
+}
+
 export function createPartition(name: string, sort: number): PartitionConfig {
     const now = Date.now();
     return {

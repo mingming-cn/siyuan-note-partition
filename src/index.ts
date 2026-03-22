@@ -7,7 +7,7 @@ import {
   buildPartitionNotebookVisibilityPlan,
 } from "@/core/notebook-visibility";
 import { linkNotebookToPartition, removePartition as removePartitionState } from "@/core/partition-service";
-import { normalizeState } from "@/core/partition-store";
+import { isPluginStateEqual, normalizeState } from "@/core/partition-store";
 import PartitionPanel from "@/partition-panel.svelte";
 import type { NotebookOption, PartitionConfig, PluginState } from "@/types/partition";
 
@@ -76,8 +76,9 @@ export default class SiyuanPartitionPlugin extends Plugin {
     });
   }
 
-  openSetting(): void {
-    this.refreshNotebookCache().then(() => {
+  async openSetting(): Promise<void> {
+    try {
+      await this.refreshNotebookCache();
       const dialog = new Dialog({
         title: this.i18n.partitionManager,
         content: `<div class="partition-panel-host" style="height: 100%;"></div>`,
@@ -98,16 +99,24 @@ export default class SiyuanPartitionPlugin extends Plugin {
           notebooks: this.notebooks,
           i18n: this.i18n,
           onSave: async (state: PluginState) => {
-            await this.saveState(state);
-            showMessage(this.i18n.stateSaved);
-            dialog.destroy();
+            try {
+              await this.saveState(state);
+              showMessage(this.i18n.stateSaved);
+              dialog.destroy();
+            } catch (error) {
+              const message = error instanceof Error ? error.message : this.i18n.stateSaveFailed;
+              showMessage(message || this.i18n.stateSaveFailed, 5000, "error");
+            }
           },
           onCancel: () => {
             dialog.destroy();
           },
         },
       });
-    });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : this.i18n.stateSaveFailed;
+      showMessage(message || this.i18n.stateSaveFailed, 5000, "error");
+    }
   }
 
   private async loadStateFromStorage() {
@@ -115,7 +124,9 @@ export default class SiyuanPartitionPlugin extends Plugin {
     const normalized = normalizeState(stored, this.notebooks, this.i18n.defaultPartition);
     this.state = normalized;
     this.data[STORAGE_NAME] = normalized;
-    await this.saveData(STORAGE_NAME, normalized);
+    if (!isPluginStateEqual(stored, normalized)) {
+      await this.saveData(STORAGE_NAME, normalized);
+    }
   }
 
   private getState(): PluginState {
@@ -343,7 +354,7 @@ export default class SiyuanPartitionPlugin extends Plugin {
     );
 
     const normalized = normalizeState(nextState, this.notebooks, this.i18n.defaultPartition);
-    const stateChanged = JSON.stringify(normalized) !== JSON.stringify(current);
+    const stateChanged = !isPluginStateEqual(normalized, current);
     if (!stateChanged) {
       return;
     }
@@ -354,7 +365,7 @@ export default class SiyuanPartitionPlugin extends Plugin {
 
   private async normalizePersistedState() {
     const normalized = normalizeState(this.state, this.notebooks, this.i18n.defaultPartition);
-    if (JSON.stringify(normalized) === JSON.stringify(this.state)) {
+    if (isPluginStateEqual(normalized, this.state)) {
       return;
     }
 

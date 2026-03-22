@@ -6,12 +6,15 @@
  * API 文档见 [API_zh_CN.md](https://github.com/siyuan-note/siyuan/blob/master/API_zh_CN.md)
  */
 
-import { fetchPost, fetchSyncPost, IWebSocketData } from "siyuan";
+import { fetchSyncPost, IWebSocketData } from "siyuan";
 
 export async function request(url: string, data: any, returnType: 'data' | 'response' = 'data') {
-    let response: IWebSocketData = await fetchSyncPost(url, data);
-    let res = response.code === 0 ? response.data : null;
-    return returnType === 'data' ? res : response;
+    const response: IWebSocketData = await fetchSyncPost(url, data);
+    if (response.code !== 0) {
+        throw new Error(response.msg || `Request failed: ${url}`);
+    }
+
+    return returnType === 'data' ? response.data : response;
 }
 
 

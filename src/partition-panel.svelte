@@ -11,11 +11,12 @@
     export let state: PluginState;
     export let notebooks: NotebookOption[];
     export let i18n: Record<string, string>;
-    export let onSave: (state: PluginState) => void;
+    export let onSave: (state: PluginState) => Promise<void>;
     export let onCancel: (() => void) | undefined;
 
     let draft: PluginState = cloneState(state);
     let isDirty = false;
+    let saving = false;
 
     $: activePartition = draft.partitions.find((item) => item.id === draft.activePartitionId) ?? draft.partitions[0];
     $: selectedNotebookCount = activePartition?.notebookIds.length ?? 0;
@@ -65,12 +66,25 @@
         return activePartition?.notebookIds.includes(notebookId) ?? false;
     }
 
-    function save() {
-        onSave?.(cloneState(draft));
-        isDirty = false;
+    async function save() {
+        if (saving) {
+            return;
+        }
+
+        saving = true;
+        try {
+            await onSave(cloneState(draft));
+            isDirty = false;
+        } finally {
+            saving = false;
+        }
     }
 
     function cancel() {
+        if (saving) {
+            return;
+        }
+
         if (isDirty && !window.confirm(i18n.unsavedChangesConfirm)) {
             return;
         }
@@ -89,22 +103,25 @@
         </div>
 
         {#each draft.partitions as partition}
-            <button
-                class:selected={partition.id === draft.activePartitionId}
-                class="partition-item"
-                on:click={() => {
-                    draft = selectPartition(draft, partition.id);
-                }}
-            >
-                <span>{partition.name || i18n.unnamedPartition}</span>
-                <span
-                    class:disabled={draft.partitions.length <= 1}
+            <div class:selected={partition.id === draft.activePartitionId} class="partition-item">
+                <button
+                    type="button"
+                    class="partition-item__main"
+                    on:click={() => {
+                        draft = selectPartition(draft, partition.id);
+                    }}
+                >
+                    <span>{partition.name || i18n.unnamedPartition}</span>
+                </button>
+                <button
+                    type="button"
                     class="partition-item__remove"
-                    on:click|stopPropagation={() => removePartition(partition.id)}
+                    disabled={draft.partitions.length <= 1 || saving}
+                    on:click={() => removePartition(partition.id)}
                 >
                     {i18n.remove}
-                </span>
-            </button>
+                </button>
+            </div>
         {/each}
     </aside>
 
@@ -155,11 +172,11 @@
                 {/if}
 
                 <div class="partition-form__actions">
-                    <button class="b3-button b3-button--cancel partition-form__action" on:click={cancel}>
+                    <button class="b3-button b3-button--cancel partition-form__action" disabled={saving} on:click={cancel}>
                         {i18n.close}
                     </button>
-                    <button class="b3-button b3-button--text partition-form__action" disabled={!isDirty} on:click={save}>
-                        {i18n.save}
+                    <button class="b3-button b3-button--text partition-form__action" disabled={!isDirty || saving} on:click={save}>
+                        {saving ? i18n.saving : i18n.save}
                     </button>
                 </div>
             {/key}
