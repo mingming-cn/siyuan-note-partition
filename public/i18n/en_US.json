@@ -20,5 +20,11 @@
     "noNotebookFound": "No notebooks found",
     "dockHint": "This version only supports top-level notebook filtering. A newly created note belongs to the active partition as long as it is created inside one of the partition's associated notebooks.",
     "switchedTo": "Switched to",
-    "lastPartitionHint": "At least one partition must remain. The last partition cannot be deleted."
+    "lastPartitionHint": "At least one partition must remain. The last partition cannot be deleted.",
+    "notebookOperationFailed": "Some notebook visibility operations failed",
+    "close": "Close",
+    "unsavedChanges": "Unsaved changes",
+    "allChangesSaved": "No unsaved changes",
+    "unsavedChangesConfirm": "You have unsaved changes. Close this panel anyway?",
+    "selectedNotebookCountLabel": "Selected notebooks:"
 }

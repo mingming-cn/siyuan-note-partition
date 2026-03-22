@@ -2,7 +2,10 @@ import { Dialog, Menu, Plugin, getFrontend, showMessage, type IWebSocketData } f
 import "./index.scss";
 
 import { lsNotebooks } from "@/api";
-import { applyPartitionNotebookVisibility } from "@/core/notebook-visibility";
+import {
+  applyPartitionNotebookVisibility,
+  buildPartitionNotebookVisibilityPlan,
+} from "@/core/notebook-visibility";
 import { linkNotebookToPartition, removePartition as removePartitionState } from "@/core/partition-service";
 import { normalizeState } from "@/core/partition-store";
 import PartitionPanel from "@/partition-panel.svelte";
@@ -13,8 +16,14 @@ const STORAGE_NAME = "partition-state";
 export default class SiyuanPartitionPlugin extends Plugin {
   private isMobile = false;
   private topBarElement?: HTMLElement;
+  private state!: PluginState;
   private notebooks: NotebookOption[] = [];
-  private syncingNotebookCreation = false;
+  private notebookSyncPending = false;
+  private notebookSyncPromise: Promise<void> | null = null;
+  private applyingPartitionVisibility = false;
+  private pendingPartitionApply = false;
+  private activePartitionApplyPromise: Promise<void> | null = null;
+  private switchingPartitionInteractionLocked = false;
 
   async onload() {
     this.isMobile = ["mobile", "browser-mobile"].includes(getFrontend());
@@ -25,7 +34,7 @@ export default class SiyuanPartitionPlugin extends Plugin {
 </symbol>`);
 
     await this.refreshNotebookCache();
-    await this.ensureState();
+    await this.loadStateFromStorage();
 
     this.addCommand({
       langKey: "openPartitionManager",
@@ -37,7 +46,7 @@ export default class SiyuanPartitionPlugin extends Plugin {
     this.eventBus.on("closed-notebook", this.handleNotebookChanged);
     this.eventBus.on("ws-main", this.handleWsMain);
 
-    await this.applyActivePartition();
+    await this.scheduleApplyActivePartition();
     console.log(`[${this.name}] loaded`);
   }
 
@@ -55,6 +64,7 @@ export default class SiyuanPartitionPlugin extends Plugin {
     this.eventBus.off("opened-notebook", this.handleNotebookChanged);
     this.eventBus.off("closed-notebook", this.handleNotebookChanged);
     this.eventBus.off("ws-main", this.handleWsMain);
+    this.unlockPartitionInteraction();
     console.log(`[${this.name}] unloaded`);
   }
 
@@ -73,6 +83,8 @@ export default class SiyuanPartitionPlugin extends Plugin {
         content: `<div class="partition-panel-host" style="height: 100%;"></div>`,
         width: this.isMobile ? "92vw" : "820px",
         height: this.isMobile ? "80vh" : "640px",
+        disableClose: true,
+        hideCloseIcon: true,
         destroyCallback: () => {
           panel.$destroy();
         },
@@ -82,7 +94,7 @@ export default class SiyuanPartitionPlugin extends Plugin {
       const panel = new PartitionPanel({
         target: host,
         props: {
-          state: this.getState(),
+          state: this.state,
           notebooks: this.notebooks,
           i18n: this.i18n,
           onSave: async (state: PluginState) => {
@@ -90,28 +102,37 @@ export default class SiyuanPartitionPlugin extends Plugin {
             showMessage(this.i18n.stateSaved);
             dialog.destroy();
           },
+          onCancel: () => {
+            dialog.destroy();
+          },
         },
       });
     });
   }
 
-  private async ensureState() {
+  private async loadStateFromStorage() {
     const stored = await this.loadData(STORAGE_NAME) as PluginState | undefined;
-    const state = normalizeState(stored, this.notebooks, this.i18n.defaultPartition);
-    this.data[STORAGE_NAME] = state;
-    await this.saveData(STORAGE_NAME, state);
+    const normalized = normalizeState(stored, this.notebooks, this.i18n.defaultPartition);
+    this.state = normalized;
+    this.data[STORAGE_NAME] = normalized;
+    await this.saveData(STORAGE_NAME, normalized);
   }
 
   private getState(): PluginState {
-    return normalizeState(this.data[STORAGE_NAME], this.notebooks, this.i18n.defaultPartition);
+    return this.state;
   }
 
   private async saveState(state: PluginState) {
     const normalized = normalizeState(state, this.notebooks, this.i18n.defaultPartition);
-    this.data[STORAGE_NAME] = normalized;
-    await this.saveData(STORAGE_NAME, normalized);
-    await this.applyActivePartition();
+    await this.persistState(normalized);
+    await this.scheduleApplyActivePartition();
     this.refreshTopBar();
+  }
+
+  private async persistState(state: PluginState) {
+    this.state = state;
+    this.data[STORAGE_NAME] = state;
+    await this.saveData(STORAGE_NAME, state);
   }
 
   private getActivePartition(): PartitionConfig {
@@ -159,8 +180,9 @@ export default class SiyuanPartitionPlugin extends Plugin {
         icon: "iconTrashcan",
         label: this.i18n.removeCurrentPartition,
         click: async () => {
-          const nextState = removePartitionState(this.getState(), this.getState().activePartitionId);
-          if (nextState.partitions.length === this.getState().partitions.length) {
+          const current = this.getState();
+          const nextState = removePartitionState(current, current.activePartitionId);
+          if (nextState.partitions.length === current.partitions.length) {
             showMessage(this.i18n.lastPartitionHint, 5000, "error");
             return;
           }
@@ -211,14 +233,55 @@ export default class SiyuanPartitionPlugin extends Plugin {
   };
 
   private handleNotebookChanged = async () => {
-    await this.syncNewNotebooksToActivePartition();
+    await this.requestNotebookSync();
   };
 
-  private async applyActivePartition() {
-    await this.refreshNotebookCache();
-    const activePartition = this.getActivePartition();
-    await applyPartitionNotebookVisibility(activePartition, this.notebooks);
-    await this.refreshNotebookCache();
+  private async scheduleApplyActivePartition() {
+    this.pendingPartitionApply = true;
+    if (!this.activePartitionApplyPromise) {
+      this.activePartitionApplyPromise = this.flushApplyActivePartition().finally(() => {
+        this.activePartitionApplyPromise = null;
+      });
+    }
+    await this.activePartitionApplyPromise;
+  }
+
+  private async flushApplyActivePartition() {
+    if (this.applyingPartitionVisibility) {
+      return;
+    }
+
+    this.applyingPartitionVisibility = true;
+    try {
+      while (this.pendingPartitionApply) {
+        this.pendingPartitionApply = false;
+        await this.applyActivePartitionOnce();
+      }
+    } finally {
+      this.applyingPartitionVisibility = false;
+    }
+  }
+
+  private async applyActivePartitionOnce() {
+    await this.withPartitionInteractionLock(async () => {
+      await this.refreshNotebookCache();
+      await this.normalizePersistedState();
+
+      const activePartition = this.getActivePartition();
+      const plan = buildPartitionNotebookVisibilityPlan(activePartition, this.notebooks);
+      if (plan.toOpen.length === 0 && plan.toClose.length === 0) {
+        return;
+      }
+
+      const result = await applyPartitionNotebookVisibility(plan);
+      if (result.opened.length > 0 || result.closed.length > 0) {
+        await this.refreshNotebookCache();
+      }
+
+      if (result.failed.length > 0) {
+        showMessage(`${this.i18n.notebookOperationFailed} (${result.failed.length})`, 5000, "error");
+      }
+    });
   }
 
   private decorateTopBarButton() {
@@ -235,48 +298,96 @@ export default class SiyuanPartitionPlugin extends Plugin {
   }
 
   private handleWsMain = async (event: CustomEvent<IWebSocketData>) => {
-    if (!this.isCreateNotebookWsEvent(event.detail)) {
+    if (!this.isNotebookMutationWsEvent(event.detail)) {
       return;
     }
 
-    await this.syncNewNotebooksToActivePartition();
+    await this.requestNotebookSync();
   };
 
-  private isCreateNotebookWsEvent(event: IWebSocketData) {
-    const payload = JSON.stringify({
-      cmd: event?.cmd,
-      callback: event?.callback,
-      msg: event?.msg,
-      data: event?.data,
-    }).toLowerCase();
+  private isNotebookMutationWsEvent(event: IWebSocketData) {
+    const fields = [event?.cmd, event?.callback, event?.msg]
+      .filter((value): value is string => typeof value === "string")
+      .map((value) => value.toLowerCase());
 
-    return payload.includes("createnotebook");
+    return fields.some((value) => value.includes("createnotebook") || value.includes("removenotebook"));
   }
 
-  private async syncNewNotebooksToActivePartition() {
-    if (this.syncingNotebookCreation) {
+  private async requestNotebookSync() {
+    this.notebookSyncPending = true;
+    if (!this.notebookSyncPromise) {
+      this.notebookSyncPromise = this.flushNotebookSync().finally(() => {
+        this.notebookSyncPromise = null;
+      });
+    }
+    await this.notebookSyncPromise;
+  }
+
+  private async flushNotebookSync() {
+    try {
+      while (this.notebookSyncPending) {
+        this.notebookSyncPending = false;
+        await this.syncNewNotebooksToActivePartitionOnce();
+      }
+    } finally {
+      this.refreshTopBar();
+    }
+  }
+
+  private async syncNewNotebooksToActivePartitionOnce() {
+    const addedNotebookIds = await this.refreshNotebookCache();
+    const current = this.getState();
+    const nextState = addedNotebookIds.reduce(
+      (state, notebookId) => linkNotebookToPartition(state, notebookId, current.activePartitionId),
+      current,
+    );
+
+    const normalized = normalizeState(nextState, this.notebooks, this.i18n.defaultPartition);
+    const stateChanged = JSON.stringify(normalized) !== JSON.stringify(current);
+    if (!stateChanged) {
       return;
     }
 
-    this.syncingNotebookCreation = true;
-    try {
-      const addedNotebookIds = await this.refreshNotebookCache();
-      const current = normalizeState(this.data[STORAGE_NAME], this.notebooks, this.i18n.defaultPartition);
-      const nextState = addedNotebookIds.length > 0
-        ? addedNotebookIds.reduce(
-          (state, notebookId) => linkNotebookToPartition(state, notebookId, current.activePartitionId),
-          current,
-        )
-        : current;
+    await this.persistState(normalized);
+    await this.scheduleApplyActivePartition();
+  }
 
-      if (addedNotebookIds.length > 0) {
-        this.data[STORAGE_NAME] = nextState;
-        await this.saveData(STORAGE_NAME, nextState);
-        await this.applyActivePartition();
-      }
-      this.refreshTopBar();
+  private async normalizePersistedState() {
+    const normalized = normalizeState(this.state, this.notebooks, this.i18n.defaultPartition);
+    if (JSON.stringify(normalized) === JSON.stringify(this.state)) {
+      return;
+    }
+
+    await this.persistState(normalized);
+  }
+
+  private lockPartitionInteraction() {
+    if (this.switchingPartitionInteractionLocked) {
+      return;
+    }
+
+    this.switchingPartitionInteractionLocked = true;
+    document.body.classList.add("partition-switching");
+  }
+
+  private unlockPartitionInteraction() {
+    if (!this.switchingPartitionInteractionLocked) {
+      document.body.classList.remove("partition-switching");
+      return;
+    }
+
+    this.switchingPartitionInteractionLocked = false;
+    document.body.classList.remove("partition-switching");
+  }
+
+  private async withPartitionInteractionLock<T>(fn: () => Promise<T>): Promise<T> {
+    this.lockPartitionInteraction();
+    try {
+      return await fn();
     } finally {
-      this.syncingNotebookCreation = false;
+      window.setTimeout(() => {
+        this.unlockPartitionInteraction();
+      }, 300);
     }
   }
 }

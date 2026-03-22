@@ -10,6 +10,15 @@
     background: var(--b3-theme-background);
 }
 
+body.partition-switching::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: transparent;
+    cursor: progress;
+}
+
 .partition-topbar__value {
     max-width: 120px;
     padding: 0 8px;
@@ -97,6 +106,24 @@
     gap: 6px;
 }
 
+.partition-form__status {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.partition-form__hint {
+    color: var(--b3-theme-on-surface-light);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.partition-form__dirty {
+    color: var(--b3-theme-error);
+}
+
 .partition-form__name {
     margin: 0;
 }
@@ -105,6 +132,18 @@
     flex: 0 0 auto;
     align-self: stretch;
     white-space: nowrap;
+}
+
+.partition-form__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: auto;
+    padding-top: 8px;
+}
+
+.partition-form__action {
+    min-width: 88px;
 }
 
 .partition-form__name-row {
@@ -207,12 +246,24 @@
         align-items: stretch;
     }
 
+    .partition-form__status {
+        align-items: flex-start;
+    }
+
     .partition-form__name-row {
         align-items: stretch;
     }
 
     .partition-form__name-row .partition-form__save {
         align-self: auto;
+    }
+
+    .partition-form__actions {
+        justify-content: stretch;
+    }
+
+    .partition-form__action {
+        flex: 1;
     }
 
     .partition-notebook-list {

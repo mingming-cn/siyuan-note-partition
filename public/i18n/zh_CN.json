@@ -20,5 +20,11 @@
     "noNotebookFound": "未找到可用笔记本",
     "dockHint": "当前版本只支持顶级笔记本过滤。新建笔记只要创建在当前分区关联的笔记本下，即自动归属当前分区。",
     "switchedTo": "已切换到",
-    "lastPartitionHint": "至少需要保留一个分区，最后一个分区不可删除。"
+    "lastPartitionHint": "至少需要保留一个分区，最后一个分区不可删除。",
+    "notebookOperationFailed": "部分笔记本可见性操作失败",
+    "close": "关闭",
+    "unsavedChanges": "有未保存修改",
+    "allChangesSaved": "当前修改已保存",
+    "unsavedChangesConfirm": "当前有未保存修改，仍要关闭面板吗？",
+    "selectedNotebookCountLabel": "已选笔记本："
 }
