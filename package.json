@@ -1,6 +1,6 @@
 {
   "name": "siyuan-note-partition",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "type": "module",
   "description": "SiYuan partition plugin that simulates workspace-like note views inside a single notebook",
   "repository": "",
