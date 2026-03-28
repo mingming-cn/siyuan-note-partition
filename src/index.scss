@@ -96,16 +96,16 @@ body.partition-switching::after {
 
 .partition-item {
     display: flex;
-    align-items: center;
+    align-items: stretch;
     justify-content: space-between;
-    gap: 8px;
-    padding: 10px 12px;
+    padding: 0;
     border: 1px solid var(--b3-border-color);
     border-radius: 8px;
     background: var(--b3-theme-background);
     color: var(--b3-theme-on-background);
     text-align: left;
     transition: background-color 0.2s, border-color 0.2s;
+    overflow: hidden;
 }
 
 .partition-item:hover {
@@ -127,9 +127,11 @@ body.partition-switching::after {
 }
 
 .partition-item__main {
+    display: flex;
+    align-items: center;
     flex: 1;
     min-width: 0;
-    padding: 0;
+    padding: 10px 4px 10px 12px;
     border: 0;
     background: transparent;
     color: inherit;
@@ -139,7 +141,9 @@ body.partition-switching::after {
 }
 
 .partition-item__remove {
-    padding: 0;
+    display: flex;
+    align-items: center;
+    padding: 10px 12px 10px 4px;
     border: 0;
     background: transparent;
     color: var(--b3-theme-on-surface-light);
