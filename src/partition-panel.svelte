@@ -12,7 +12,6 @@
     export let notebooks: NotebookOption[];
     export let i18n: Record<string, string>;
     export let onSave: (state: PluginState) => Promise<void>;
-    export let onCancel: (() => void) | undefined;
 
     let draft: PluginState = cloneState(state);
     let isDirty = false;
@@ -80,16 +79,16 @@
         }
     }
 
-    function cancel() {
+    export function requestClose() {
         if (saving) {
-            return;
+            return false;
         }
 
         if (isDirty && !window.confirm(i18n.unsavedChangesConfirm)) {
-            return;
+            return false;
         }
 
-        onCancel?.();
+        return true;
     }
 </script>
 
@@ -145,6 +144,13 @@
                                 value={activePartition.name}
                                 on:input={(event) => updateActive("name", event.currentTarget.value)}
                             />
+                            <button
+                                class="b3-button b3-button--text partition-form__save"
+                                disabled={!isDirty || saving}
+                                on:click={save}
+                            >
+                                {saving ? i18n.saving : i18n.save}
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -152,13 +158,13 @@
                 <div class="partition-notebook-list">
                     {#if notebooks.length > 0}
                         {#each notebooks as notebook (notebook.id)}
-                            <label class="partition-notebook-item">
+                            <label class:selected={isNotebookSelected(notebook.id)} class="partition-notebook-item">
                                 <input
                                     type="checkbox"
                                     checked={isNotebookSelected(notebook.id)}
                                     on:change={(event) => toggleNotebook(notebook.id, event.currentTarget.checked)}
                                 />
-                                <span>{notebook.name}</span>
+                                <span class="partition-notebook-item__name">{notebook.name}</span>
                                 <span class="partition-notebook-item__meta">{notebook.id}</span>
                             </label>
                         {/each}
@@ -170,15 +176,6 @@
                 {#if draft.partitions.length <= 1}
                     <div class="partition-inline-hint">{i18n.lastPartitionHint}</div>
                 {/if}
-
-                <div class="partition-form__actions">
-                    <button class="b3-button b3-button--cancel partition-form__action" disabled={saving} on:click={cancel}>
-                        {i18n.close}
-                    </button>
-                    <button class="b3-button b3-button--text partition-form__action" disabled={!isDirty || saving} on:click={save}>
-                        {saving ? i18n.saving : i18n.save}
-                    </button>
-                </div>
             {/key}
         {/if}
     </section>

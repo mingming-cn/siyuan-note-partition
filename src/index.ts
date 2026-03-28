@@ -79,19 +79,27 @@ export default class SiyuanPartitionPlugin extends Plugin {
   async openSetting(): Promise<void> {
     try {
       await this.refreshNotebookCache();
+      let destroyed = false;
+      let closing = false;
+
       const dialog = new Dialog({
         title: this.i18n.partitionManager,
         content: `<div class="partition-panel-host" style="height: 100%;"></div>`,
         width: this.isMobile ? "92vw" : "820px",
         height: this.isMobile ? "80vh" : "640px",
         disableClose: true,
-        hideCloseIcon: true,
         destroyCallback: () => {
+          destroyed = true;
+          closeButton?.removeEventListener("click", handleCloseClick);
+          scrim?.removeEventListener("click", handleCloseClick);
+          document.removeEventListener("keydown", handleKeydown, true);
           panel.$destroy();
         },
       });
 
       const host = dialog.element.querySelector(".partition-panel-host") as HTMLElement;
+      const closeButton = dialog.element.querySelector(".b3-dialog__close") as HTMLElement | null;
+      const scrim = dialog.element.querySelector(".b3-dialog__scrim") as HTMLElement | null;
       const panel = new PartitionPanel({
         target: host,
         props: {
@@ -108,11 +116,53 @@ export default class SiyuanPartitionPlugin extends Plugin {
               showMessage(message || this.i18n.stateSaveFailed, 5000, "error");
             }
           },
-          onCancel: () => {
-            dialog.destroy();
-          },
         },
       });
+
+      const requestClose = async () => {
+        if (destroyed || closing) {
+          return;
+        }
+
+        const shouldClose = panel.requestClose();
+        if (!shouldClose) {
+          return;
+        }
+
+        closing = true;
+        dialog.destroy();
+      };
+
+      const handleCloseClick = (event: Event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        void requestClose().finally(() => {
+          closing = false;
+        });
+      };
+
+      const handleKeydown = (event: KeyboardEvent) => {
+        if (event.key !== "Escape" || destroyed) {
+          return;
+        }
+
+        const activeElement = document.activeElement;
+        if (!(activeElement instanceof Node) || !dialog.element.contains(activeElement)) {
+          return;
+        }
+
+        event.preventDefault();
+        event.stopPropagation();
+        void requestClose().finally(() => {
+          closing = false;
+        });
+      };
+
+      closeButton?.classList.remove("fn__none");
+      closeButton?.setAttribute("aria-label", this.i18n.close);
+      closeButton?.addEventListener("click", handleCloseClick);
+      scrim?.addEventListener("click", handleCloseClick);
+      document.addEventListener("keydown", handleKeydown, true);
     } catch (error) {
       const message = error instanceof Error ? error.message : this.i18n.stateSaveFailed;
       showMessage(message || this.i18n.stateSaveFailed, 5000, "error");
@@ -156,12 +206,6 @@ export default class SiyuanPartitionPlugin extends Plugin {
   }
 
   private handleTopBarClick() {
-    if (this.isMobile) {
-      this.openSetting();
-      return;
-    }
-
-    const rect = this.resolveMenuRect();
     const menu = new Menu("siyuan-note-partition-topbar");
     menu.addItem({
       icon: "iconSettings",
@@ -179,7 +223,12 @@ export default class SiyuanPartitionPlugin extends Plugin {
         icon: partition.id === state.activePartitionId ? "iconSelect" : "iconRight",
         label: partition.name,
         click: async () => {
-          await this.saveState({ ...state, activePartitionId: partition.id });
+          const current = this.getState();
+          if (!current.partitions.some((item) => item.id === partition.id)) {
+            return;
+          }
+
+          await this.saveState({ ...current, activePartitionId: partition.id });
           showMessage(`${this.i18n.switchedTo} ${partition.name}`);
         },
       });
@@ -203,10 +252,15 @@ export default class SiyuanPartitionPlugin extends Plugin {
       });
     }
 
-    menu.open({
-      x: Math.round(rect.left),
-      y: Math.round(rect.bottom + 6),
-    });
+    if (this.isMobile) {
+      menu.fullscreen("bottom");
+    } else {
+      const rect = this.resolveMenuRect();
+      menu.open({
+        x: Math.round(rect.left),
+        y: Math.round(rect.bottom + 6),
+      });
+    }
   }
 
   private resolveMenuRect(): DOMRect {
@@ -302,6 +356,9 @@ export default class SiyuanPartitionPlugin extends Plugin {
 
     const activePartition = this.getActivePartition();
     this.topBarElement.classList.add("partition-topbar");
+    if (this.isMobile) {
+      this.topBarElement.classList.add("partition-topbar--mobile");
+    }
     this.topBarElement.setAttribute("aria-label", this.i18n.partitionManager);
     this.topBarElement.innerHTML = `
 <svg class="toolbar__icon"><use xlink:href="#iconPartition"></use></svg>

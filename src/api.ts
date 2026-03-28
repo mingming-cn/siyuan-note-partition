@@ -383,22 +383,18 @@ export async function renderSprig(template: string): Promise<string> {
 // **************************************** File ****************************************
 
 export async function getFile(path: string, type?: "text" | "json"): Promise<string | object> {
-    let data = {
-        path: path
-    }
-    let url = '/api/file/getFile';
-    let promise = new Promise<IWebSocketData>((resolve, reject) => {
-        try {
-            fetchPost(url, data, (response: any) => {
-                let data = type === 'json' ? JSON.parse(response) : response;
-                resolve(data);
-            });
-        } catch (error) {
-            reject(error);
-        }
+    const response = await fetch('/api/file/getFile', {
+        method: 'POST',
+        body: JSON.stringify({
+            path: path,
+        }),
     });
-    let response: IWebSocketData = await promise;
-    return response;
+    if (!response.ok) {
+        throw new Error(`Request failed: /api/file/getFile (${response.status})`);
+    }
+
+    const content = await response.text();
+    return type === 'json' ? JSON.parse(content) : content;
 }
 
 /**

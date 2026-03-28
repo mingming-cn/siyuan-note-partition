@@ -1,4 +1,4 @@
-import type { PartitionConfig, PluginState } from "@/types/partition";
+import type { PluginState } from "@/types/partition";
 
 import { createPartition } from "@/core/partition-store";
 

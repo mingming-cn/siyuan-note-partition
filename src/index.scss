@@ -32,6 +32,38 @@ body.partition-switching::after {
     white-space: nowrap;
 }
 
+.partition-topbar--mobile {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    max-width: none;
+    min-height: 48px;
+    padding: 0 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    gap: 8px;
+    box-sizing: border-box;
+}
+
+.partition-topbar--mobile .toolbar__icon {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+}
+
+.partition-topbar--mobile .partition-topbar__value {
+    max-width: none;
+    min-width: 0;
+    padding: 0;
+    border-radius: 0;
+    background: transparent;
+    color: inherit;
+    font-size: 14px;
+    line-height: normal;
+    flex: 1;
+}
+
 .partition-panel-host {
     height: 100%;
 }
@@ -49,7 +81,7 @@ body.partition-switching::after {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    padding: 8px 12px 8px 4px;
+    padding: 0 16px 0 0;
     border-right: 1px solid var(--b3-border-color);
     box-sizing: border-box;
 }
@@ -59,6 +91,7 @@ body.partition-switching::after {
     align-items: center;
     justify-content: space-between;
     gap: 8px;
+    margin-bottom: 4px;
 }
 
 .partition-item {
@@ -72,11 +105,25 @@ body.partition-switching::after {
     background: var(--b3-theme-background);
     color: var(--b3-theme-on-background);
     text-align: left;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+.partition-item:hover {
+    background: var(--b3-theme-surface);
+}
+
+.partition-item:focus-within {
+    border-color: var(--b3-theme-primary);
 }
 
 .partition-item.selected {
     border-color: var(--b3-theme-primary);
     background: var(--b3-theme-primary-lightest);
+}
+
+.partition-item.selected .partition-item__main {
+    color: var(--b3-theme-primary);
+    font-weight: 600;
 }
 
 .partition-item__main {
@@ -88,6 +135,7 @@ body.partition-switching::after {
     color: inherit;
     cursor: pointer;
     text-align: left;
+    outline: none;
 }
 
 .partition-item__remove {
@@ -97,6 +145,13 @@ body.partition-switching::after {
     color: var(--b3-theme-on-surface-light);
     font-size: 12px;
     cursor: pointer;
+    transition: color 0.2s;
+    outline: none;
+}
+
+.partition-item__remove:hover:not(:disabled),
+.partition-item__remove:focus-visible:not(:disabled) {
+    color: var(--b3-theme-error);
 }
 
 .partition-item__remove:disabled {
@@ -107,16 +162,17 @@ body.partition-switching::after {
 .partition-form {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 16px;
     min-width: 0;
-    padding: 8px 8px 8px 0;
+    min-height: 0;
+    padding: 0;
     box-sizing: border-box;
 }
 
 .partition-form__top {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 12px;
 }
 
 .partition-form__status {
@@ -125,6 +181,9 @@ body.partition-switching::after {
     justify-content: space-between;
     gap: 12px;
     flex-wrap: wrap;
+    padding: 8px 12px;
+    background: var(--b3-theme-surface);
+    border-radius: 6px;
 }
 
 .partition-form__hint {
@@ -135,22 +194,14 @@ body.partition-switching::after {
 
 .partition-form__dirty {
     color: var(--b3-theme-error);
+    font-weight: 500;
 }
 
 .partition-form__name {
-    margin: 0;
-}
-
-.partition-form__actions {
     display: flex;
-    justify-content: flex-end;
-    gap: 12px;
-    margin-top: auto;
-    padding-top: 8px;
-}
-
-.partition-form__action {
-    min-width: 88px;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0;
 }
 
 .partition-form__name-row {
@@ -164,12 +215,18 @@ body.partition-switching::after {
     min-width: 0;
 }
 
+.partition-form__save {
+    min-width: 88px;
+    flex-shrink: 0;
+}
+
 .partition-notebook-list {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 12px;
     align-content: start;
-    max-height: 420px;
+    flex: 1;
+    min-height: 0;
     overflow: auto;
     padding-right: 4px;
 }
@@ -177,21 +234,58 @@ body.partition-switching::after {
 .partition-notebook-item {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr);
-    gap: 8px;
-    align-items: start;
-    min-height: 74px;
-    padding: 10px 12px;
+    grid-template-rows: auto auto;
+    column-gap: 10px;
+    row-gap: 2px;
+    align-items: center;
+    padding: 8px 12px;
     border: 1px solid var(--b3-border-color);
-    border-radius: 8px;
+    border-radius: 6px;
     background: var(--b3-theme-background);
     box-sizing: border-box;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+.partition-notebook-item:hover {
+    background: var(--b3-theme-surface);
+}
+
+.partition-notebook-item.selected {
+    border-color: var(--b3-theme-primary);
+    background: var(--b3-theme-primary-lightest);
+}
+
+.partition-notebook-item:focus-within {
+    border-color: var(--b3-theme-primary);
+}
+
+.partition-notebook-item input[type="checkbox"] {
+    grid-row: 1 / span 2;
+    margin: 0;
+    align-self: center;
+}
+
+.partition-notebook-item__name {
+    grid-column: 2;
+    grid-row: 1;
+    font-size: 14px;
+    line-height: 1.4;
+    color: var(--b3-theme-on-background);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .partition-notebook-item__meta {
     grid-column: 2;
+    grid-row: 2;
     color: var(--b3-theme-on-surface-light);
     font-size: 12px;
-    word-break: break-all;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .partition-empty,
@@ -224,11 +318,6 @@ body.partition-switching::after {
 }
 
 @media (max-width: 720px) {
-    .partition-topbar {
-        max-width: 160px;
-        padding: 0 8px;
-    }
-
     .partition-panel {
         grid-template-columns: 1fr;
         padding: 12px;
@@ -255,18 +344,16 @@ body.partition-switching::after {
 
     .partition-form__name-row {
         align-items: stretch;
+        flex-wrap: wrap;
     }
 
-    .partition-form__actions {
-        justify-content: stretch;
-    }
-
-    .partition-form__action {
-        flex: 1;
+    .partition-form__save {
+        width: 100%;
     }
 
     .partition-notebook-list {
         grid-template-columns: 1fr;
-        max-height: none;
+        flex: none;
+        overflow: visible;
     }
 }
