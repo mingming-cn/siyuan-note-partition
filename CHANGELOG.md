@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 
 The format is loosely based on Keep a Changelog.
 
+## [0.0.3] - 2026-03-28
+
+Polish release focused on mobile navigation, safer dialog closing, and more touch-friendly partition management.
+
+### Changed
+
+- Updated the top-bar interaction on mobile to open the partition menu as a fullscreen bottom sheet instead of jumping directly into the management dialog.
+- Refined the partition management layout on both desktop and mobile, including a more prominent inline save action, cleaner status presentation, and clearer notebook selection cards.
+- Adjusted the mobile top-bar button styling so the current partition label fits more naturally in constrained space.
+
+### Fixed
+
+- Fixed dialog closing so the close button, scrim click, and `Escape` all respect the unsaved-changes confirmation flow before dismissing the panel.
+- Fixed partition switching from the top-bar menu to re-read the latest state before applying the selected partition.
+- Fixed file reads in the plugin API wrapper to surface failed HTTP responses instead of silently treating them as successful results.
+
 ## [0.0.2] - 2026-03-22
 
 Refinement release focused on partition switching reliability, state normalization, and panel usability.
